@@ -4,19 +4,18 @@ use nom::combinator::map;
 use nom::sequence::{delimited, preceded, tuple};
 use nom::IResult;
 use std::fmt::{Display, Formatter};
-use std::os::unix::raw::ino_t;
 use nom::branch::alt;
 use nom::multi::many0;
 use crate::util_parsers::*;
 
-#[derive(Debug,Clone)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
+
 pub enum Atom {
     String(String),
     Name(String),
 
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
     Void,
     Constant(Atom),
