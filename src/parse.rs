@@ -58,7 +58,7 @@ pub fn parse_let(input: &str) ->    IResult<&str, Expr>{
 
 }
 pub fn parse_comment(input: &str) -> IResult<&str, Expr>{
-    map(comment,|txt|Expr::Comment)(input)
+    map(comment,|_|Expr::Comment)(input)
 }
 pub fn parse_string(input: &str) -> IResult<&str, Atom> {
     //" text "
