@@ -1,4 +1,4 @@
-let age="fred"
-println(age)
-let age="dddsd"
-println(age)
+
+let print = |x| println(x)
+print("sdsdsddfdfd")
+

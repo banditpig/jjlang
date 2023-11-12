@@ -5,7 +5,7 @@ use nom::sequence::{delimited, preceded, tuple};
 use nom::IResult;
 use std::fmt::{Display, Formatter};
 use nom::branch::alt;
-use nom::multi::many0;
+use nom::multi::{many0, separated_list0};
 use crate::util_parsers::*;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -17,10 +17,12 @@ pub enum Atom {
 }
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
+    Comment,
     Void,
     Constant(Atom),
-    Call(String, Box<Expr>),
-    Let(String, Box<Expr>)
+    Call(String, Vec<Expr>),
+    Let(String, Box<Expr>),
+    Closure(Vec<String>, Vec<Expr>)
 }
 impl Display for Atom {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -55,6 +57,9 @@ pub fn parse_let(input: &str) ->    IResult<&str, Expr>{
     map(parser,|(name,arg)|Expr::Let(name.to_string(), Box::new(arg)))(input)
 
 }
+pub fn parse_comment(input: &str) -> IResult<&str, Expr>{
+    map(comment,|txt|Expr::Comment)(input)
+}
 pub fn parse_string(input: &str) -> IResult<&str, Atom> {
     //" text "
     let parser = delimited(
@@ -70,14 +75,26 @@ pub fn parse_call(input: &str) -> IResult<&str, Expr> {
     let parse_name = ws(alpha1);
     let parse_arg = delimited(
         ws(tag("(")),
-        parse_expr,
+        separated_list0(tag(","), parse_expr),
         tag(")")
     );
     let parser = tuple((parse_name, parse_arg));
-    map(parser, |(name, arg)| Expr::Call(name.to_string(), Box::new(arg)))(input)
+    map(parser, |(name, arg)| Expr::Call(name.to_string(), arg))(input)
+}
+pub fn parse_closure(input: &str) -> IResult<&str, Expr> {
+
+    let parse_name= map(alpha1,String::from);
+    let parse_args = delimited(
+        tag("|"),
+        separated_list0(tag(","), parse_name),
+        tag("|")
+    );
+    let parser = tuple(( ws(parse_args), parse_expr));
+    map(parser, |(args, expr)| Expr::Closure(args, vec!(expr)))(input)
+
 }
 pub fn parse_expr(input: &str) -> IResult<&str, Expr>{
-  alt((parse_let, parse_call, parse_constant))(input)
+  alt((parse_closure, parse_let, parse_call, parse_constant, parse_comment))(input)
 }
 pub fn parser(input: &str) -> IResult<&str, Vec< Expr>>{
     many0(ws(parse_expr))(input)
