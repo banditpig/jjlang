@@ -1,2 +1,4 @@
-let age="32"
-println(name)
+let age="fred"
+println(age)
+let age="dddsd"
+println(age)
