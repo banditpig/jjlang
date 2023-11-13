@@ -1,6 +1,7 @@
-fn print(name){
- println(name)
-
+fn test(){
+ return "hello worldssdd"
 }
-print("hello world" )
-print("bye world" )
+let s = test()
+println(s)
+
+

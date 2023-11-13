@@ -24,6 +24,7 @@ pub enum Expr {
     Let(String, Box<Expr>),
     Closure(Vec<String>, Vec<Expr>),
     Function(String, Vec<String>, Vec<Expr>),
+    Return(Box<Expr>)
 }
 impl Display for Atom {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -32,6 +33,19 @@ impl Display for Atom {
             Atom::Name(n) => { write!(f, "{n}")}
         }
     }
+}
+impl Display for Expr {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Expr::Constant(atom) => {write!(f,"{atom}")},
+            _ => Ok(())
+        }
+    }
+}
+
+pub fn parse_return(input: &str) -> IResult<&str, Expr> {
+    let parser = preceded(tag("return"), ws(parse_expr));
+    map(parser,|expr| Expr::Return(Box::new(expr)))(input)
 }
 pub fn parse_name(input: &str) -> IResult<&str, String>{
     map(alpha1,String::from)(input)
@@ -42,11 +56,7 @@ pub fn parse_function(input: &str) -> IResult<&str, Expr>{
     (expr)*
     }
      */
-    // let parse_func_name = preceded(
-    //     ws(tag("fn")),
-    //     ws(alpha1)
-    // );
-   // let parse_name = map(alpha1,String::from);
+
     let parse_args = delimited(
         tag("("),
         separated_list0(tag(","),ws(parse_name)),
@@ -132,6 +142,7 @@ pub fn parse_closure(input: &str) -> IResult<&str, Expr> {
 }
 pub fn parse_expr(input: &str) -> IResult<&str, Expr>{
   alt((
+      parse_return,
       parse_function,
       parse_closure,
       parse_call,

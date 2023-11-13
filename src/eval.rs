@@ -6,7 +6,7 @@ pub fn eval(expr: Expr, ctx: &mut HashMap<String, Expr>) -> Expr{
         Expr::Call(name,args ) => {
             if name == "println"{
                 for arg in args{
-                    print!("{:?}", eval(arg, ctx));
+                    print!("{}", eval(arg, ctx));
                 }
                 println!()
 
@@ -14,16 +14,17 @@ pub fn eval(expr: Expr, ctx: &mut HashMap<String, Expr>) -> Expr{
                 match ctx.get(&name){
                     Some(Expr::Closure(parameters, body)) => {
                         let mut scope = ctx.clone();
-                        for (paramter, arg) in parameters.into_iter().zip(args.into_iter()){
+                        for (parameter, arg) in parameters.into_iter().zip(args.into_iter()) {
                             let expr = eval(arg, &mut scope);
-                            scope.insert(paramter.clone(), expr);
-                            for expr in body{
-                                eval(expr.clone(), &mut scope);
-                            }
+                            scope.insert(parameter.clone(), expr);
                         }
-
-                       // eval(args,ctx
+                        for expr in body{
+                           if let Expr::Return(expr) = eval(expr.clone(), &mut scope){
+                               return *expr;
+                           }
+                        }
                     }
+
                     _ => {panic!("Expected closure")}
                 }
             }
@@ -34,7 +35,8 @@ pub fn eval(expr: Expr, ctx: &mut HashMap<String, Expr>) -> Expr{
             _ => expr
         },
         Expr::Let(name, value) => {
-            ctx.insert(name, *value);
+            let expr = eval(*value, ctx);
+            ctx.insert(name, expr);
             Expr::Void
         }
         Expr::Void | Expr::Closure(_, _) =>  expr,
@@ -44,5 +46,6 @@ pub fn eval(expr: Expr, ctx: &mut HashMap<String, Expr>) -> Expr{
             ctx.insert(name, Expr::Closure(args, body));
             Expr::Void
         }
+        Expr::Return(expr) => Expr::Return( Box::new(eval(*expr, ctx)))
     }
 }
