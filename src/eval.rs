@@ -40,5 +40,9 @@ pub fn eval(expr: Expr, ctx: &mut HashMap<String, Expr>) -> Expr{
         Expr::Void | Expr::Closure(_, _) =>  expr,
         Expr::Comment => expr,
 
+        Expr::Function(name , args, body) => {
+            ctx.insert(name, Expr::Closure(args, body));
+            Expr::Void
+        }
     }
 }

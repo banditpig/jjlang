@@ -1,4 +1,6 @@
+fn print(name){
+ println(name)
 
-let print = |x| println(x)
-print("sdsdsddfdfd")
-
+}
+print("hello world" )
+print("bye world" )

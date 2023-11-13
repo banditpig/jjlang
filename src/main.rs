@@ -13,7 +13,7 @@ fn main() {
     let (_,  exprs) = parser(txt).unwrap();
     let mut ctx:HashMap<String, Expr> = HashMap::new();
     for expr in exprs{
-        //dbg!( &expr);
+         //dbg!( &expr);
         eval(expr, &mut ctx);
     }
 
